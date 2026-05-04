@@ -1,6 +1,7 @@
 // src/Rinha.Api/McCRiskTable.cs
 using System.Collections.Frozen;
 using System.Text.Json;
+using Rinha.Indexing;
 
 namespace Rinha.Api;
 
@@ -8,7 +9,7 @@ namespace Rinha.Api;
 /// Tabela MCC → risco em [0, 1]. Carregada do mcc_risk.json embarcado na imagem.
 /// Default 0.5 para MCCs ausentes.
 /// </summary>
-public sealed class McCRiskTable
+public sealed class McCRiskTable : IMcCRiskLookup
 {
     private readonly FrozenDictionary<string, float> _table;
     public const float Default = 0.5f;
