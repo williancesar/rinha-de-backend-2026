@@ -1,0 +1,12 @@
+bin/
+obj/
+*.user
+.vs/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+out/
+publish/
+TestResults/
+*.log
