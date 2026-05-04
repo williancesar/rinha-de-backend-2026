@@ -1,0 +1,38 @@
+services:
+  api-1:
+    image: rinha-fraud-api:local
+    deploy:
+      resources:
+        limits:
+          cpus: "0.475"
+          memory: "167M"
+    networks: [rinha]
+
+  api-2:
+    image: rinha-fraud-api:local
+    deploy:
+      resources:
+        limits:
+          cpus: "0.475"
+          memory: "167M"
+    networks: [rinha]
+
+  lb:
+    image: haproxy:3.0-alpine
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "9999:9999"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.05"
+          memory: "16M"
+    depends_on:
+      - api-1
+      - api-2
+    networks: [rinha]
+
+networks:
+  rinha:
+    driver: bridge
