@@ -1,4 +1,7 @@
 // src/Rinha.Indexing/IvfSearch.cs
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+
 namespace Rinha.Indexing;
 
 public static class IvfSearch
@@ -21,6 +24,11 @@ public static class IvfSearch
     {
         if (queryFloat.Length != view.D) throw new ArgumentException(nameof(queryFloat));
         if (queryQuantized.Length != view.D) throw new ArgumentException(nameof(queryQuantized));
+
+        // Pad query to VectorStride for SIMD (last lanes are zero, contribute 0 to L2²)
+        Span<sbyte> queryPadded = stackalloc sbyte[view.VectorStride];
+        queryPadded.Clear();
+        queryQuantized.CopyTo(queryPadded);
 
         // Fase 1: top-nprobe clusters por distância L2² da query (float) aos centroides (float).
         Span<int> topClusters = stackalloc int[nprobe];
@@ -50,8 +58,8 @@ public static class IvfSearch
 
             for (var i = 0; i < end - start; i++)
             {
-                var refVec = clusterVecs.Slice(i * view.VectorStride, view.D);
-                var dist = L2SquaredInt8(queryQuantized, refVec);
+                var refVec = clusterVecs.Slice(i * view.VectorStride, view.VectorStride);
+                var dist = L2SquaredInt8(queryPadded, refVec);
                 if (dist < topResultDist[K - 1]) // pior atual
                 {
                     var globalIdx = start + i;
@@ -85,13 +93,40 @@ public static class IvfSearch
 
     private static int L2SquaredInt8(ReadOnlySpan<sbyte> a, ReadOnlySpan<sbyte> b)
     {
-        var sum = 0;
-        for (var i = 0; i < a.Length; i++)
+        // Expected: a.Length == b.Length == 16 (VectorStride). Padding lanes are zero.
+        if (Vector128.IsHardwareAccelerated && a.Length >= 16 && b.Length >= 16)
         {
-            var diff = a[i] - b[i];
-            sum += diff * diff;
+            var va = Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(a));
+            var vb = Vector128.LoadUnsafe(ref MemoryMarshal.GetReference(b));
+
+            // Widen sbyte → short to safely subtract without overflow (sbyte sub can wrap).
+            var aLow = Vector128.WidenLower(va);   // Vector128<short>
+            var aHigh = Vector128.WidenUpper(va);
+            var bLow = Vector128.WidenLower(vb);
+            var bHigh = Vector128.WidenUpper(vb);
+
+            var diffLow = aLow - bLow;
+            var diffHigh = aHigh - bHigh;
+
+            // Widen short → int before squaring (max diff 254, 254²=64516 > short.MaxValue).
+            var dl0 = Vector128.WidenLower(diffLow);
+            var dl1 = Vector128.WidenUpper(diffLow);
+            var dh0 = Vector128.WidenLower(diffHigh);
+            var dh1 = Vector128.WidenUpper(diffHigh);
+
+            var sumV = (dl0 * dl0) + (dl1 * dl1) + (dh0 * dh0) + (dh1 * dh1);
+            return Vector128.Sum(sumV);
         }
-        return sum;
+
+        // Scalar fallback
+        int s = 0;
+        var min = a.Length < b.Length ? a.Length : b.Length;
+        for (var i = 0; i < min; i++)
+        {
+            var d = a[i] - b[i];
+            s += d * d;
+        }
+        return s;
     }
 
     /// <summary>

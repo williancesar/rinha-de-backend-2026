@@ -42,7 +42,7 @@ COPY --from=indexer /tmp/data/index.bin /app/data/index.bin
 COPY resources/mcc_risk.json /app/data/mcc_risk.json
 ENV INDEX_PATH=/app/data/index.bin \
     MCC_RISK_PATH=/app/data/mcc_risk.json \
-    NPROBE=8 \
+    NPROBE=4 \
     DOTNET_GCConserveMemory=9 \
     DOTNET_NOLOGO=1 \
     DOTNET_CLI_TELEMETRY_OPTOUT=1

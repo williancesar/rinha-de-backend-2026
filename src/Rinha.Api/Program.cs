@@ -30,7 +30,7 @@ builder.Services.ConfigureHttpJsonOptions(o =>
 // Index path: configurável via env (default /app/data/index.bin no container)
 var indexPath = Environment.GetEnvironmentVariable("INDEX_PATH") ?? "/app/data/index.bin";
 var mccPath = Environment.GetEnvironmentVariable("MCC_RISK_PATH") ?? "/app/data/mcc_risk.json";
-var nprobe = int.TryParse(Environment.GetEnvironmentVariable("NPROBE"), out var np) ? np : 8;
+var nprobe = int.TryParse(Environment.GetEnvironmentVariable("NPROBE"), out var np) ? np : 4;
 
 // State (singleton)
 var ready = new ReadyState();
