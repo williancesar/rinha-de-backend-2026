@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Rinha.Api/Rinha.Api.csproj" />
+    <Project Path="src/Rinha.IndexBuilder/Rinha.IndexBuilder.csproj" />
+    <Project Path="src/Rinha.Indexing/Rinha.Indexing.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Rinha.Tests/Rinha.Tests.csproj" />
+  </Folder>
+</Solution>
