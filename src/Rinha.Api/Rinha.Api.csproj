@@ -12,6 +12,7 @@
     <RetainVMGarbageCollection>true</RetainVMGarbageCollection>
     <TieredCompilation>false</TieredCompilation>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rinha.Indexing\Rinha.Indexing.csproj" />
