@@ -1,6 +1,6 @@
 services:
   api-1:
-    image: ghcr.io/williancesar/rinha-fraud-api:submission
+    image: ghcr.io/williancesar/rinha-fraud-api:v20260504-220528-95b19c4
     deploy:
       resources:
         limits:
@@ -9,7 +9,7 @@ services:
     networks: [rinha]
 
   api-2:
-    image: ghcr.io/williancesar/rinha-fraud-api:submission
+    image: ghcr.io/williancesar/rinha-fraud-api:v20260504-220528-95b19c4
     deploy:
       resources:
         limits:
